@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.dietapp'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.28'
+    annotationProcessor 'org.projectlombok:lombok:1.18.28'
+    
+	// cucumber.io dependencies
+    testImplementation "io.cucumber:cucumber-java:6.6.0"
+    testImplementation "io.cucumber:cucumber-junit:6.6.0"
+
+    // Use JUnit Jupiter API for testing.
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+
+    // Use JUnit Jupiter Engine for testing.
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
