@@ -17,22 +17,13 @@ import io.cucumber.java.en.When;
 import io.cucumber.java.en.Then;
 
 public class FoodStepDefinitions {
-    private FoodService foodService;
+    private FoodService foodService = new FoodService();
     private int lastCode;
     private String lastBody;
     private final Gson gson = new Gson();
     private Map<String, String> lastFormData = new HashMap<>();
 
-    @Before
-    public void before() throws Exception {}
-
-    @Given("the server is running")
-    public void server_running() throws Exception {
-        // Use the service layer directly in tests (no embedded server). Ensure fresh storage for each scenario.
-        java.nio.file.Path p = java.nio.file.Paths.get("data/foods.json");
-        try { java.nio.file.Files.deleteIfExists(p); } catch (Exception e) {}
-        foodService = new FoodService();
-    }
+    // Tests use the service layer directly and do not start any server or perform file I/O.
 
     @Given("a user provides the following information:")
     public void user_provides_information(DataTable table) {
@@ -84,7 +75,7 @@ public class FoodStepDefinitions {
         submit_add_food_form();
     }
 
-    @When("the user updates the food named \"{string}\" with the following information:")
+    @When("the user updates the food named {string} with the following information:")
     public void user_updates_food_by_name(String existingName, DataTable table) throws Exception {
         // prepare update fields
         Map<String, String> update = new HashMap<>();
@@ -112,7 +103,7 @@ public class FoodStepDefinitions {
         if (vr.success) { lastCode = 200; lastBody = vr.message; } else { lastCode = 400; lastBody = vr.message; }
     }
 
-    @Then("the API should return an error containing \"{string}\"")
+    @Then("the API should return an error containing {string}")
     public void api_error_contains(String fragment) throws Exception {
         // expect 4xx
         assertTrue(lastCode >= 400 && lastCode < 500, "Expected 4xx but was " + lastCode + " body:" + lastBody);
