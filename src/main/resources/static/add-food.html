@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Add Food · DietApp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">DietApp</a>
+        <div class="collapse navbar-collapse">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link active" href="/add-food.html">Add Food</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container">
+      <div class="row">
+        <div class="col-md-5">
+          <div class="card shadow-sm mb-4">
+            <div class="card-body">
+              <h5 class="card-title">Add a new food</h5>
+              <div id="alertPlaceholder"></div>
+              <form id="foodForm" class="needs-validation" novalidate>
+                <div class="mb-3">
+                  <label for="name" class="form-label">Name</label>
+                  <input id="name" name="name" class="form-control" required>
+                  <div class="invalid-feedback">Please provide a name.</div>
+                </div>
+                <div class="mb-3">
+                  <label for="calories" class="form-label">Calories (per serving)</label>
+                  <input id="calories" name="calories" type="number" step="0.1" class="form-control" required>
+                  <div class="invalid-feedback">Please provide a positive calorie value.</div>
+                </div>
+                <div class="mb-3">
+                  <label for="servingSize" class="form-label">Serving size</label>
+                  <input id="servingSize" name="servingSize" class="form-control" placeholder="e.g. 100g">
+                </div>
+                <div class="row g-2 mb-3">
+                  <div class="col">
+                    <label for="quantity" class="form-label">Quantity</label>
+                    <input id="quantity" name="quantity" type="number" step="0.01" class="form-control" value="0">
+                  </div>
+                  <div class="col">
+                    <label for="unit" class="form-label">Unit</label>
+                    <input id="unit" name="unit" class="form-control" placeholder="pcs, g, ml">
+                  </div>
+                </div>
+
+                <div class="d-grid">
+                  <button class="btn btn-primary" type="submit">Add food</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-7">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Your foods</h5>
+              <div id="foodsList" class="table-responsive">
+                <table class="table table-sm" id="foodsTable">
+                  <thead>
+                    <tr><th>Name</th><th>Calories</th><th>Serving</th><th>Qty</th><th>Unit</th><th>Actions</th></tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const alertPlaceholder = document.getElementById('alertPlaceholder');
+
+      function showAlert(message, type='success'){
+        // Create alert element using DOM API to avoid accidental characters and XSS
+        const alertEl = document.createElement('div');
+        alertEl.className = `alert alert-${type} alert-dismissible`;
+        alertEl.setAttribute('role', 'alert');
+
+        // Safe text node for message
+        const textNode = document.createTextNode(message);
+        alertEl.appendChild(textNode);
+
+        // Close button
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-close';
+        btn.setAttribute('data-bs-dismiss', 'alert');
+        btn.setAttribute('aria-label', 'Close');
+        alertEl.appendChild(btn);
+
+        alertPlaceholder.innerHTML = '';
+        alertPlaceholder.appendChild(alertEl);
+      }
+
+      async function fetchFoods(){
+        try{
+          const res = await fetch('/api/foods');
+          if(!res.ok) return;
+          const data = await res.json();
+          const tbody = document.querySelector('#foodsTable tbody');
+          tbody.innerHTML = '';
+          (data || []).forEach(f => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${escapeHtml(f.name || '')}</td><td>${f.calories ?? ''}</td><td>${escapeHtml(f.servingSize || '')}</td><td>${f.quantity ?? ''}</td><td>${escapeHtml(f.unit || '')}</td><td><div class="btn-group btn-group-sm" role="group"><button class="btn btn-outline-secondary btn-edit" data-id="${f.id}">Edit</button><button class="btn btn-outline-danger btn-delete" data-id="${f.id}">Delete</button></div></td>`;
+            tbody.appendChild(tr);
+          });
+          // attach handlers
+          tbody.querySelectorAll('.btn-edit').forEach(b=>b.addEventListener('click', onEdit));
+          tbody.querySelectorAll('.btn-delete').forEach(b=>b.addEventListener('click', onDelete));
+        }catch(e){ console.warn(e); }
+      }
+
+      function escapeHtml(unsafe) {
+        return unsafe
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      document.getElementById('foodForm').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const form = e.target;
+        if(!form.checkValidity()){
+          form.classList.add('was-validated');
+          return;
+        }
+        const payload = {
+          name: document.getElementById('name').value,
+          calories: parseFloat(document.getElementById('calories').value),
+          servingSize: document.getElementById('servingSize').value,
+          quantity: parseFloat(document.getElementById('quantity').value) || 0,
+          unit: document.getElementById('unit').value
+        };
+        try{
+          let res, data;
+          if (form.dataset.editingId) {
+            const id = form.dataset.editingId;
+            res = await fetch('/api/foods/' + encodeURIComponent(id), {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+            data = await res.json();
+            if (res.ok) {
+              showAlert(data.message || 'Updated', 'success');
+              delete form.dataset.editingId;
+              form.querySelector('button[type="submit"]').innerText = 'Add food';
+            } else {
+              showAlert(data.error || 'Failed to update', 'danger');
+            }
+          } else {
+            res = await fetch('/api/foods', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+            data = await res.json();
+            if(res.ok){
+              showAlert(data.message || 'Added', 'success');
+              form.reset();
+            } else {
+              showAlert(data.error || 'Failed to add food', 'danger');
+            }
+          }
+          form.classList.remove('was-validated');
+          await fetchFoods();
+        }catch(err){
+          showAlert('Network error', 'danger');
+          console.error(err);
+        }
+      });
+
+      async function onEdit(e){
+        const id = e.currentTarget.dataset.id;
+        // fetch current food list and populate form
+        try{
+          const res = await fetch('/api/foods');
+          const data = await res.json();
+          const f = (data || []).find(x => x.id === id);
+          if (!f) return showAlert('Food not found', 'warning');
+          document.getElementById('name').value = f.name || '';
+          document.getElementById('calories').value = f.calories || '';
+          document.getElementById('servingSize').value = f.servingSize || '';
+          document.getElementById('quantity').value = f.quantity || 0;
+          document.getElementById('unit').value = f.unit || '';
+          const form = document.getElementById('foodForm');
+          form.dataset.editingId = id;
+          form.querySelector('button[type="submit"]').innerText = 'Save changes';
+        }catch(err){ showAlert('Network error', 'danger'); }
+      }
+
+      async function onDelete(e){
+        const id = e.currentTarget.dataset.id;
+        if(!confirm('Delete this food?')) return;
+        try{
+          const res = await fetch('/api/foods/' + encodeURIComponent(id), {method:'DELETE'});
+          if(res.status === 204){
+            showAlert('Deleted', 'success');
+            await fetchFoods();
+          } else {
+            const data = await res.json();
+            showAlert(data.error || 'Delete failed', 'danger');
+          }
+        }catch(err){ showAlert('Network error', 'danger'); }
+      }
+
+      // load foods on startup
+      fetchFoods();
+    </script>
+  </body>
+</html>
