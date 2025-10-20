@@ -13,6 +13,7 @@ public class UserEntity {
 
     private String name;
     private String email;
+    private String password;
     private int age;
     private double weight;
     private boolean vegetarian;
@@ -23,6 +24,10 @@ public class UserEntity {
     //setters and getters for user
     public String getId(){
         return id;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getName(){
@@ -51,6 +56,10 @@ public class UserEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setEmail(String email) {

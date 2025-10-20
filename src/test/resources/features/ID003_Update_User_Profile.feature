@@ -10,6 +10,7 @@ Given user "Alice" with user id "101" is logged into the system
 And the user has the following current profile:
       |Field        |Value           |
       |Name         |Alice Johnson   |
+      |Password     |Hello111        |
       |Email        |alice@email.com |
       |Age          |28              |
       |Weight       |65              |
