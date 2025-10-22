@@ -12,14 +12,16 @@ public class User {
     private double weight;
     private boolean vegetarian;
     private boolean glutenFree;
+    private String password;
 
     // No-args constructor
     public User() {}
 
     // All-args constructor
-    public User(String id, String name, String email, int age, double weight, boolean vegetarian, boolean glutenFree) {
+    public User(String id, String name, String password, String email, int age, double weight, boolean vegetarian, boolean glutenFree) {
         this.id = id;
         this.name = name;
+        this.password = password;
         this.email = email;
         this.age = age;
         this.weight = weight;

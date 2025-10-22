@@ -54,6 +54,7 @@ Given an existing user already has the email "alex@email.com"
 And a new user provides the following information:
     |Field        |Value           |
     |Name         |Alice           |
+    |Password     |Hello111        |
     |Email        |alex@email.com  |
     |Age          |30              |
     |Weight       |75              |
@@ -69,6 +70,7 @@ Scenario: Create Profile with Dietary Preferences (Alternate flow)
 Given a new user provides the following information:
     |Field        |Value           |
     |Name         |Alice Johnson   |
+    |Password     |Hello111        |
     |Email        |alice@email.com |
     |Age          |28              |
     |Weight       |65              |
