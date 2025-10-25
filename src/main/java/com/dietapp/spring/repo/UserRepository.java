@@ -6,5 +6,5 @@ import com.dietapp.spring.entity.UserEntity;
 
 public interface UserRepository extends JpaRepository<UserEntity, String>{
     public UserEntity findUserById(String id);
-    public UserEntity findUserByName(String name);
+    public UserEntity findUserByEmail(String email);
 } 

@@ -1,6 +1,7 @@
 package com.dietapp.spring.dto;
 
 import com.dietapp.model.User;
+import com.dietapp.spring.entity.UserEntity;
 
 public class UserResponseDto {
     private String id;
@@ -17,14 +18,14 @@ public class UserResponseDto {
 
     }
 
-    public UserResponseDto(User model){
+    public UserResponseDto(UserEntity model){
         this.id = model.getId();
         this.email = model.getEmail();
         this.age = model.getAge();
         this.weight = model.getWeight();
         this.name = model.getName();
-        this.vegetarian = model.isVegetarian();
-        this.glutenFree = model.isGlutenFree();
+        this.vegetarian = model.getVeg();
+        this.glutenFree = model.getGlut();
         this.password = model.getPassword();
     }
 

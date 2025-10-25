@@ -21,6 +21,16 @@ public class UserEntity {
     
     public UserEntity() {}
 
+    public UserEntity(String name, String email, int age, String password, double weight, boolean vegetarian, boolean glutenFree){
+        this.name = name;
+        this.password = password;
+        this.email = email;
+        this.age = age;
+        this.weight = weight;
+        this.vegetarian = vegetarian;
+        this.glutenFree = glutenFree;
+    }
+
     //setters and getters for user
     public String getId(){
         return id;
