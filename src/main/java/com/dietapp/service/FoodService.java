@@ -101,6 +101,52 @@ public class FoodService {
         return new ValidationResult(false, "Food not found");
     }
 
+    public synchronized List<Food> filterFoodsByDietaryPreference(boolean isVegetarian, boolean isGlutenFree) {
+        List<Food> filteredFoods = new ArrayList<>();
+        
+        for (int i = 0; i < foods.size(); i++) {
+            boolean hasPreferences = true;
+            
+            List<String> dietaryTags = foods.get(i).getDietaryTags();
+
+            if (dietaryTags == null && (isVegetarian || isGlutenFree)) {
+                continue;
+            }
+            
+            if (isVegetarian) {
+                boolean hasVegetarian = false;
+                for (int j = 0; j < dietaryTags.size(); j ++) {
+                    if (dietaryTags.get(j).equalsIgnoreCase("vegetarian")) {
+                        hasVegetarian = true;
+                        break;
+                    }
+                }
+                if (!hasVegetarian) {
+                    hasPreferences = false;
+                }
+            }
+            
+            if (isGlutenFree && hasPreferences) {
+                boolean hasGF = false;
+                for (int j = 0; j < dietaryTags.size(); j ++) {
+                    if (dietaryTags.get(j).equalsIgnoreCase("gluten-free")) {
+                        hasGF = true;
+                        break;
+                    }
+                }
+                if (!hasGF) {
+                    hasPreferences = false;
+                }
+            }
+            
+            if (hasPreferences) {
+                filteredFoods.add(foods.get(i));
+            }
+        }
+        
+        return filteredFoods;
+    }
+
     public synchronized boolean deleteFood(String id) {
         if (id == null) return false;
         for (int i = 0; i < foods.size(); i++) {
