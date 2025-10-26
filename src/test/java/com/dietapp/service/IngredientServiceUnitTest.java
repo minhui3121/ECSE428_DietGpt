@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 
 import com.dietapp.model.Ingredient;
 
+import io.cucumber.java.sl.In;
+
 public class IngredientServiceUnitTest {
 
     private static final Path STORE = Paths.get("data/ingredients.json");
@@ -184,5 +186,31 @@ public class IngredientServiceUnitTest {
         assertEquals(1, list.size(), "new service should load ingredients from disk");
         assertEquals("Cocoa", list.get(0).getName());
         assertEquals("G", list.get(0).getUnit()); // normalized
+    }
+
+    @Test
+    public void testFilterIngredients(){
+        //Arrange
+        IngredientService svc1 = new IngredientService();
+        Ingredient a = new Ingredient();
+        a.setName("Tofu");
+        a.setDietaryTags(List.of("Vegan"));
+        Ingredient b = new Ingredient();
+        b.setName("Chicken");
+        Ingredient c = new Ingredient();
+        c.setName("Almond Milk");
+        c.setAllergens(List.of("Nuts"));
+        c.setDietaryTags(List.of("Vegan"));
+
+        assertTrue(svc1.addIngredient(a).success);
+        assertTrue(svc1.addIngredient(b).success);
+        assertTrue(svc1.addIngredient(c).success);
+
+        //Act
+        List<Ingredient> res = svc1.filterIngredients(List.of("Vegan"), List.of("Nuts"));
+        
+        //Assert
+        System.out.println((res.size()));
+        assertEquals(1, res.size(), "Should return 1 ingredients");
     }
 }
