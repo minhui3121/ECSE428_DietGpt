@@ -48,7 +48,12 @@ public class IngredientService {
     private void persist() {
         try {
             File parent = storageFile.getParentFile();
-            if (parent != null) parent.mkdirs();
+            if (parent != null && !parent.exists()) {
+                // Ensure directory exists; if creation fails but directory still doesn't exist, we silently skip per your style
+                if (!parent.mkdirs() && !parent.exists()) {
+                    // Could log if you add logging later
+                }
+            }
             try (FileWriter fw = new FileWriter(storageFile)) {
                 gson.toJson(ingredients, fw);
             }
@@ -59,10 +64,7 @@ public class IngredientService {
 
     // ------------ Utility management methods ------------
 
-    /**
-     * Clears all ingredients from memory and persists an empty list to disk.
-     * Used in tests or setup steps to start from a clean state.
-     */
+    /** Clears all ingredients from memory and persists an empty list to disk. */
     public synchronized void clear() {
         ingredients.clear();
         persist();
@@ -97,8 +99,7 @@ public class IngredientService {
 
         // duplicate by name (case-insensitive)
         for (Ingredient existing : ingredients) {
-            if (existing.getName() != null && existing.getName().equalsIgnoreCase(name)) {
-                // Match feature expectation exactly:
+            if (equalsIgnoreCaseSafe(existing.getName(), name)) {
                 return new ValidationResult(false, "Ingredient already exists");
             }
         }
@@ -143,10 +144,7 @@ public class IngredientService {
             if (existing.getId().equals(id)) {
                 // duplicate name with other items
                 for (Ingredient other : ingredients) {
-                    if (!other.getId().equals(id) &&
-                            other.getName() != null &&
-                            other.getName().equalsIgnoreCase(name.trim())) {
-                        // Match feature expectation exactly:
+                    if (!other.getId().equals(id) && equalsIgnoreCaseSafe(other.getName(), name.trim())) {
                         return new ValidationResult(false, "Ingredient already exists");
                     }
                 }
@@ -180,11 +178,8 @@ public class IngredientService {
 
     // ------------ Simple filters (optional, analogous to FoodService) ------------
 
-    /**
-     * Filters by dietary tags and allergens. If both lists are empty or null, returns all.
-     * includeTags: every tag in includeTags must be present (case-insensitive)
-     * excludeAllergens: excludes any ingredient that has at least one of these allergens (case-insensitive)
-     */
+    /** Filters by dietary tags and allergens. */
+    @SuppressWarnings("unused")
     public synchronized List<Ingredient> filterIngredients(List<String> includeTags, List<String> excludeAllergens) {
         List<Ingredient> out = new ArrayList<>();
         for (Ingredient ing : ingredients) {
@@ -197,7 +192,7 @@ public class IngredientService {
                     for (String t : includeTags) {
                         boolean has = false;
                         for (String it : ing.getDietaryTags()) {
-                            if (it != null && t != null && it.equalsIgnoreCase(t)) { has = true; break; }
+                            if (equalsIgnoreCaseSafe(it, t)) { has = true; break; }
                         }
                         if (!has) { ok = false; break; }
                     }
@@ -207,7 +202,7 @@ public class IngredientService {
             if (ok && excludeAllergens != null && !excludeAllergens.isEmpty() && ing.getAllergens() != null) {
                 for (String a : excludeAllergens) {
                     for (String ia : ing.getAllergens()) {
-                        if (ia != null && a != null && ia.equalsIgnoreCase(a)) { ok = false; break; }
+                        if (equalsIgnoreCaseSafe(ia, a)) { ok = false; break; }
                     }
                     if (!ok) break;
                 }
@@ -228,5 +223,10 @@ public class IngredientService {
             this.success = success;
             this.message = message;
         }
+    }
+
+    // ------------ helpers ------------
+    private static boolean equalsIgnoreCaseSafe(String a, String b) {
+        return a != null && b != null && a.equalsIgnoreCase(b);
     }
 }
