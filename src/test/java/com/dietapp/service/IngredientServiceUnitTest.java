@@ -210,7 +210,6 @@ public class IngredientServiceUnitTest {
         List<Ingredient> res = svc1.filterIngredients(List.of("Vegan"), List.of("Nuts"));
         
         //Assert
-        System.out.println((res.size()));
         assertEquals(1, res.size(), "Should return 1 ingredients");
     }
 }
