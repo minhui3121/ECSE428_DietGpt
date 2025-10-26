@@ -26,12 +26,14 @@ public class IngredientServiceUnitTest {
         IngredientService svc = new IngredientService();
         Ingredient ing = new Ingredient();
         ing.setName("Salt");
-        ing.setUnit("g"); // optional but nice to set
+        ing.setUnit("g"); // optional
         IngredientService.ValidationResult vr = svc.addIngredient(ing);
         assertTrue(vr.success, "valid ingredient with just name (and optional unit) should be accepted");
         List<Ingredient> all = svc.getIngredients();
         assertEquals(1, all.size());
         assertEquals("Salt", all.get(0).getName());
+        // normalized to uppercase if provided
+        assertEquals("G", all.get(0).getUnit());
     }
 
     @Test
@@ -40,10 +42,11 @@ public class IngredientServiceUnitTest {
         Ingredient ing = new Ingredient();
         ing.setName("Water");
         ing.setUnit("ml");
-        ing.setCaloriesPerUnit(0.0); // allowed
-        ing.setQuantity(0.0);        // allowed
+        ing.setCaloriesPerUnit(0.0);
+        ing.setQuantity(0.0);
         IngredientService.ValidationResult vr = svc.addIngredient(ing);
         assertTrue(vr.success, "zero calories & zero quantity should be allowed");
+        assertEquals("ML", svc.getIngredients().get(0).getUnit()); // normalized
     }
 
     @Test
@@ -106,7 +109,7 @@ public class IngredientServiceUnitTest {
 
         Ingredient updated = new Ingredient();
         updated.setName("Olive Oil");
-        updated.setUnit("ml");
+        updated.setUnit("ml");               // will normalize to "ML"
         updated.setCaloriesPerUnit(884.0);
         updated.setQuantity(100.0);
 
@@ -115,7 +118,7 @@ public class IngredientServiceUnitTest {
 
         Ingredient after = svc.getIngredients().get(0);
         assertEquals("Olive Oil", after.getName());
-        assertEquals("ml", after.getUnit());
+        assertEquals("ML", after.getUnit()); // <-- expect normalized uppercase
         assertEquals(884.0, after.getCaloriesPerUnit(), 1e-9);
         assertEquals(100.0, after.getQuantity(), 1e-9);
     }
@@ -180,5 +183,6 @@ public class IngredientServiceUnitTest {
         List<Ingredient> list = svc2.getIngredients();
         assertEquals(1, list.size(), "new service should load ingredients from disk");
         assertEquals("Cocoa", list.get(0).getName());
+        assertEquals("G", list.get(0).getUnit()); // normalized
     }
 }
