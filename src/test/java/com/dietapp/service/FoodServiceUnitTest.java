@@ -2,14 +2,39 @@ package com.dietapp.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.IOException;
 import java.util.List;
 
+import java.nio.file.*;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.dietapp.model.Food;
 import com.dietapp.model.Ingredient;
 
 public class FoodServiceUnitTest {
+
+    private static final Path DIRECTORY_PATH = Paths.get("data");
+
+    @BeforeEach
+    void cleanDirectory() throws IOException {
+        if (Files.exists(DIRECTORY_PATH)) {
+            deleteRecursively(DIRECTORY_PATH);
+        }
+        Files.createDirectories(DIRECTORY_PATH); // optional: recreate the empty folder
+    }
+
+    private void deleteRecursively(Path path) throws IOException {
+        if (Files.isDirectory(path)) {
+            try (var entries = Files.list(path)) {
+                for (Path entry : entries.toList()) {
+                    deleteRecursively(entry);
+                }
+            }
+        }
+        Files.deleteIfExists(path);
+    }
     
     @Test
     public void addValidFood() {
@@ -53,6 +78,14 @@ public class FoodServiceUnitTest {
         b1.setDietaryTags(List.of("vegan", "vegetarian"));
         d1.setDietaryTags(List.of("vegan"));
         b1.setAllergens(List.of("nuts", "soy"));
+        a1.setCalories(1);
+        b1.setCalories(1);
+        c1.setCalories(1);
+        d1.setCalories(1);
+        svc.addFood(a1);
+        svc.addFood(b1);
+        svc.addFood(c1);
+        svc.addFood(d1);
 
         //Act
         List<Food> result = svc.filterFoodsByDietaryPreference(false, true);
@@ -78,6 +111,14 @@ public class FoodServiceUnitTest {
         b1.setDietaryTags(List.of("vegan", "vegetarian"));
         d1.setDietaryTags(List.of("vegan"));
         b1.setAllergens(List.of("nuts", "soy"));
+        a1.setCalories(1);
+        b1.setCalories(1);
+        c1.setCalories(1);
+        d1.setCalories(1);
+        svc.addFood(a1);
+        svc.addFood(b1);
+        svc.addFood(c1);
+        svc.addFood(d1);
 
         //Act
         List<Food> result = svc.filterFoodsByDietaryPreference(true, false);
@@ -103,6 +144,14 @@ public class FoodServiceUnitTest {
         b1.setDietaryTags(List.of("gluten-free", "vegetarian"));
         d1.setDietaryTags(List.of("vegetarian"));
         b1.setAllergens(List.of("nuts", "soy"));
+        a1.setCalories(1);
+        b1.setCalories(1);
+        c1.setCalories(1);
+        d1.setCalories(1);
+        svc.addFood(a1);
+        svc.addFood(b1);
+        svc.addFood(c1);
+        svc.addFood(d1);
 
         //Act
         List<Food> result = svc.filterFoodsByDietaryPreference(true, true);
@@ -128,6 +177,14 @@ public class FoodServiceUnitTest {
         c1.setDietaryTags(List.of("vegan"));
         d1.setDietaryTags(List.of("vegan"));
         b1.setAllergens(List.of("nuts", "soy"));
+        a1.setCalories(1);
+        b1.setCalories(1);
+        c1.setCalories(1);
+        d1.setCalories(1);
+        svc.addFood(a1);
+        svc.addFood(b1);
+        svc.addFood(c1);
+        svc.addFood(d1);
 
         //Act
         List<Food> result = svc.filterFoodsByDietaryPreference(false, false);
