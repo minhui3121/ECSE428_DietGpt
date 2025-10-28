@@ -38,103 +38,271 @@ public class FoodServiceUnitTest {
 
     @Test
     public void testFilterGlutenFree() {
-        //Assert
+        // Clean persistence between runs
+        try { java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get("data/foods.json")); } catch (Exception ignore) {}
+
         FoodService svc = new FoodService();
-        Ingredient a = new Ingredient();
+
         Food a1 = new Food();
-        Food b1 = new Food();
-        Food c1 = new Food();
-        Food d1 = new Food();
         a1.setName("Pasta");
-        b1.setName("Salad");
-        c1.setName("Chicken Sandwich");
-        d1.setName("Dumplings");
+        a1.setCalories(300.0);
         a1.setDietaryTags(List.of("gluten-free"));
+
+        Food b1 = new Food();
+        b1.setName("Salad");
+        b1.setCalories(120.0);
         b1.setDietaryTags(List.of("vegan", "vegetarian"));
-        d1.setDietaryTags(List.of("vegan"));
         b1.setAllergens(List.of("nuts", "soy"));
 
-        //Act
+        Food c1 = new Food();
+        c1.setName("Chicken Sandwich");
+        c1.setCalories(450.0);
+
+        Food d1 = new Food();
+        d1.setName("Dumplings");
+        d1.setCalories(400.0);
+        d1.setDietaryTags(List.of("vegan"));
+
+        // Add foods to service
+        assertTrue(svc.addFood(a1).success);
+        assertTrue(svc.addFood(b1).success);
+        assertTrue(svc.addFood(c1).success);
+        assertTrue(svc.addFood(d1).success);
+
+        // Act
         List<Food> result = svc.filterFoodsByDietaryPreference(false, true);
 
-        //Assert
+        // Assert
         assertEquals(1, result.size());
     }
 
     @Test
     public void testFilterVegetarian() {
-        //Assert
+        try { java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get("data/foods.json")); } catch (Exception ignore) {}
+
         FoodService svc = new FoodService();
-        Ingredient a = new Ingredient();
+
         Food a1 = new Food();
-        Food b1 = new Food();
-        Food c1 = new Food();
-        Food d1 = new Food();
         a1.setName("Pasta");
-        b1.setName("Salad");
-        c1.setName("Chicken Sandwich");
-        d1.setName("Dumplings");
+        a1.setCalories(300.0);
         a1.setDietaryTags(List.of("gluten-free"));
+
+        Food b1 = new Food();
+        b1.setName("Salad");
+        b1.setCalories(120.0);
         b1.setDietaryTags(List.of("vegan", "vegetarian"));
-        d1.setDietaryTags(List.of("vegan"));
         b1.setAllergens(List.of("nuts", "soy"));
 
-        //Act
+        Food c1 = new Food();
+        c1.setName("Chicken Sandwich");
+        c1.setCalories(450.0);
+
+        Food d1 = new Food();
+        d1.setName("Dumplings");
+        d1.setCalories(400.0);
+        d1.setDietaryTags(List.of("vegan"));
+
+        assertTrue(svc.addFood(a1).success);
+        assertTrue(svc.addFood(b1).success);
+        assertTrue(svc.addFood(c1).success);
+        assertTrue(svc.addFood(d1).success);
+
         List<Food> result = svc.filterFoodsByDietaryPreference(true, false);
 
-        //Assert
-        assertEquals(1, result.size());
+        assertEquals(1, result.size()); // only "Salad" has "vegetarian"
     }
 
     @Test
     public void testFilterGlutenFreeAndVegetarian() {
-        //Assert
+        try { java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get("data/foods.json")); } catch (Exception ignore) {}
+
         FoodService svc = new FoodService();
-        Ingredient a = new Ingredient();
+
         Food a1 = new Food();
-        Food b1 = new Food();
-        Food c1 = new Food();
-        Food d1 = new Food();
         a1.setName("Pasta");
-        b1.setName("Salad");
-        c1.setName("Chicken Sandwich");
-        d1.setName("Dumplings");
+        a1.setCalories(300.0);
         a1.setDietaryTags(List.of("gluten-free"));
+
+        Food b1 = new Food();
+        b1.setName("Salad");
+        b1.setCalories(120.0);
         b1.setDietaryTags(List.of("gluten-free", "vegetarian"));
-        d1.setDietaryTags(List.of("vegetarian"));
         b1.setAllergens(List.of("nuts", "soy"));
 
-        //Act
+        Food c1 = new Food();
+        c1.setName("Chicken Sandwich");
+        c1.setCalories(450.0);
+
+        Food d1 = new Food();
+        d1.setName("Dumplings");
+        d1.setCalories(400.0);
+        d1.setDietaryTags(List.of("vegetarian"));
+
+        assertTrue(svc.addFood(a1).success);
+        assertTrue(svc.addFood(b1).success);
+        assertTrue(svc.addFood(c1).success);
+        assertTrue(svc.addFood(d1).success);
+
         List<Food> result = svc.filterFoodsByDietaryPreference(true, true);
 
-        //Assert
-        assertEquals(1, result.size());
+        assertEquals(1, result.size()); // only "Salad" has both tags
     }
 
     @Test
     public void testNoPreference() {
-        //Assert
+        try { java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get("data/foods.json")); } catch (Exception ignore) {}
+
         FoodService svc = new FoodService();
+
         Food a1 = new Food();
-        Food b1 = new Food();
-        Food c1 = new Food();
-        Food d1 = new Food();
         a1.setName("Pasta");
-        b1.setName("Salad");
-        c1.setName("Chicken Sandwich");
-        d1.setName("Dumplings");
+        a1.setCalories(300.0);
         a1.setDietaryTags(List.of("gluten-free"));
+
+        Food b1 = new Food();
+        b1.setName("Salad");
+        b1.setCalories(120.0);
         b1.setDietaryTags(List.of("vegan", "vegetarian"));
-        c1.setDietaryTags(List.of("vegan"));
-        d1.setDietaryTags(List.of("vegan"));
         b1.setAllergens(List.of("nuts", "soy"));
 
-        //Act
+        Food c1 = new Food();
+        c1.setName("Chicken Sandwich");
+        c1.setCalories(450.0);
+        c1.setDietaryTags(List.of("vegan"));
+
+        Food d1 = new Food();
+        d1.setName("Dumplings");
+        d1.setCalories(400.0);
+        d1.setDietaryTags(List.of("vegan"));
+
+        assertTrue(svc.addFood(a1).success);
+        assertTrue(svc.addFood(b1).success);
+        assertTrue(svc.addFood(c1).success);
+        assertTrue(svc.addFood(d1).success);
+
         List<Food> result = svc.filterFoodsByDietaryPreference(false, false);
 
-        //Assert
-        assertEquals(4, result.size());
+        assertEquals(4, result.size()); // no prefs -> return all foods
     }
+
+    @Test
+    public void findFoods_combinesPrefsAndAvailability_allIngredientsRequired() {
+        // cleanup
+        java.nio.file.Path p = java.nio.file.Paths.get("data/foods.json");
+        try { java.nio.file.Files.deleteIfExists(p); } catch (Exception ignore) {}
+
+        FoodService svc = new FoodService();
+
+        Food salad = new Food();
+        salad.setName("Green Salad");
+        salad.setCalories(120.0);
+        salad.setDietaryTags(java.util.List.of("vegetarian", "gluten-free"));
+        salad.setIngredients(java.util.List.of("Lettuce", "Olive Oil", "Lemon"));
+
+        Food sandwich = new Food();
+        sandwich.setName("Chicken Sandwich");
+        sandwich.setCalories(450.0);
+        sandwich.setIngredients(java.util.List.of("Chicken", "Bread"));
+
+        assertTrue(svc.addFood(salad).success);
+        assertTrue(svc.addFood(sandwich).success);
+
+        java.util.Set<String> available = new java.util.HashSet<>(java.util.Arrays.asList(
+                "lettuce", "olive oil" // missing Lemon on purpose
+        ));
+
+        java.util.List<Food> res = svc.findFoodsByAvailabilityAndPreferences(available, true, true);
+        // Green Salad is vegetarian + GF but missing "Lemon" -> should NOT appear
+        assertEquals(0, res.size(), "Should require all ingredients to be available");
+    }
+
+    @Test
+    public void findFoods_becomesAvailableWhenLastIngredientAppears() {
+        java.nio.file.Path p = java.nio.file.Paths.get("data/foods.json");
+        try { java.nio.file.Files.deleteIfExists(p); } catch (Exception ignore) {}
+
+        FoodService svc = new FoodService();
+
+        Food salad = new Food();
+        salad.setName("Green Salad");
+        salad.setCalories(120.0);
+        salad.setDietaryTags(java.util.List.of("vegetarian", "gluten-free"));
+        salad.setIngredients(java.util.List.of("Lettuce", "Olive Oil", "Lemon"));
+        assertTrue(svc.addFood(salad).success);
+
+        java.util.Set<String> available = new java.util.HashSet<>(java.util.Arrays.asList(
+                "lettuce", "olive oil", "lemon"
+        ));
+
+        java.util.List<Food> res = svc.findFoodsByAvailabilityAndPreferences(available, true, true);
+        assertEquals(1, res.size());
+        assertEquals("Green Salad", res.get(0).getName());
+    }
+
+    @Test
+    public void findFoods_noPreference_filtersOnlyByAvailability() {
+        java.nio.file.Path p = java.nio.file.Paths.get("data/foods.json");
+        try { java.nio.file.Files.deleteIfExists(p); } catch (Exception ignore) {}
+
+        FoodService svc = new FoodService();
+
+        Food vegDish = new Food();
+        vegDish.setName("Pasta Marinara");
+        vegDish.setCalories(380.0);
+        vegDish.setDietaryTags(java.util.List.of("vegetarian"));
+        vegDish.setIngredients(java.util.List.of("Pasta", "Tomato Sauce"));
+
+        Food nonVeg = new Food();
+        nonVeg.setName("Chicken Rice");
+        nonVeg.setCalories(500.0);
+        nonVeg.setIngredients(java.util.List.of("Chicken", "Rice"));
+
+        assertTrue(svc.addFood(vegDish).success);
+        assertTrue(svc.addFood(nonVeg).success);
+
+        // Only ingredients for veg dish are available
+        java.util.Set<String> available = new java.util.HashSet<>(java.util.Arrays.asList(
+                "pasta", "tomato sauce"
+        ));
+
+        java.util.List<Food> res = svc.findFoodsByAvailabilityAndPreferences(available, false, false);
+        assertEquals(1, res.size());
+        assertEquals("Pasta Marinara", res.get(0).getName());
+    }
+
+    @Test
+    public void findFoods_caseInsensitiveIngredientMatch_andGlutenFreeFlag() {
+        java.nio.file.Path p = java.nio.file.Paths.get("data/foods.json");
+        try { java.nio.file.Files.deleteIfExists(p); } catch (Exception ignore) {}
+
+        FoodService svc = new FoodService();
+
+        Food soup = new Food();
+        soup.setName("Miso Soup");
+        soup.setCalories(90.0);
+        soup.setDietaryTags(java.util.List.of("gluten-free"));
+        soup.setIngredients(java.util.List.of("Water", "Miso", "Tofu"));
+
+        Food noodles = new Food();
+        noodles.setName("Udon Noodles");
+        noodles.setCalories(320.0);
+        // not GF
+        noodles.setIngredients(java.util.List.of("Udon", "Broth"));
+
+        assertTrue(svc.addFood(soup).success);
+        assertTrue(svc.addFood(noodles).success);
+
+        // Mixed casing on purpose
+        java.util.Set<String> available = new java.util.HashSet<>(java.util.Arrays.asList(
+                "water", "MISO", "tofu", "UDON", "broth"
+        ));
+
+        // Ask for gluten-free only -> should return only Miso Soup even though Udon is available
+        java.util.List<Food> res = svc.findFoodsByAvailabilityAndPreferences(available, false, true);
+        assertEquals(1, res.size());
+        assertEquals("Miso Soup", res.get(0).getName());
+    }
+
 
 
 }
