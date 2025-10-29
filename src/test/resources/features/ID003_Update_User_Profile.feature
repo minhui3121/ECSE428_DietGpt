@@ -1,4 +1,4 @@
-Feature: Update User Profile
+Feature: ID003 Update User Profile
 
 As a DietGPT User
 I would like to update my user profile information

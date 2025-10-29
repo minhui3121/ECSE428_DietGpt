@@ -1,4 +1,4 @@
-Feature: Add New Food
+Feature: ID004 Add New Food
 
 As a user of DietApp
 I want to add foods to my personal food database

@@ -1,4 +1,4 @@
-Feature: Generate Daily Meal Plan
+Feature: ID016 Generate Daily Meal Plan
 
   As a DietGpt User
   I would like to generate a daily meal plan
