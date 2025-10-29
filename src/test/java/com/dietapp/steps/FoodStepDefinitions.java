@@ -22,6 +22,10 @@ public class FoodStepDefinitions {
     private String lastBody;
     private final Gson gson = new Gson();
     private Map<String, String> lastFormData = new HashMap<>();
+    private java.util.Set<String> available = new java.util.HashSet<>();
+    private boolean prefVegetarian;
+    private boolean prefGlutenFree;
+    private java.util.List<Food> lastResults = java.util.List.of();
 
     // Tests use the service layer directly and do not start any server or perform file I/O.
 
@@ -127,5 +131,83 @@ public class FoodStepDefinitions {
         if (vr.success) { lastCode = 200; lastBody = vr.message; } else { lastCode = 400; lastBody = vr.message; }
     }
 
-    // No HTTP body reading required when calling the service layer directly
+    @Given("the following foods exist:")
+    public void the_following_foods_exist(io.cucumber.datatable.DataTable table) {
+        List<Map<String, String>> rows = table.asMaps(String.class, String.class);
+        for (Map<String, String> row : rows) {
+            Food f = new Food();
+            f.setName(row.getOrDefault("Name", "").trim());
+            try { f.setCalories(Double.parseDouble(row.getOrDefault("Calories", "1"))); }
+            catch (Exception e) { f.setCalories(1.0); } // must be > 0
+
+            // optional ingredients
+            String ing = row.getOrDefault("Ingredients", "").trim();
+            if (!ing.isEmpty()) {
+                List<String> ingredients = java.util.Arrays.stream(ing.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .toList();
+                f.setIngredients(ingredients);
+            }
+
+            // optional tags
+            String tags = row.getOrDefault("Tags", "").trim();
+            if (!tags.isEmpty()) {
+                List<String> dietaryTags = java.util.Arrays.stream(tags.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .toList();
+                f.setDietaryTags(dietaryTags);
+            }
+
+            FoodService.ValidationResult vr = foodService.addFood(f);
+            if (!vr.success) throw new RuntimeException("Failed to add food: " + f.getName());
+        }
+    }
+
+    @Given("the available ingredients are {string}")
+    public void the_available_ingredients_are(String csv) {
+        java.util.Arrays.stream(csv.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(String::toLowerCase)
+                .forEach(available::add);
+    }
+
+    @Given("user preference vegetarian is {string} and gluten-free is {string}")
+    public void user_preference_flags(String veg, String gf) {
+        prefVegetarian = veg.equalsIgnoreCase("true") || veg.equalsIgnoreCase("yes");
+        prefGlutenFree = gf.equalsIgnoreCase("true") || gf.equalsIgnoreCase("yes");
+    }
+
+    @When("I search foods by availability and preferences")
+    public void i_search_foods_by_availability_and_preferences() {
+        lastResults = foodService.findFoodsByAvailabilityAndPreferences(
+                available, prefVegetarian, prefGlutenFree
+        );
+    }
+
+    @Then("I should get {int} matching foods")
+    public void i_should_get_matching_foods(Integer expected) {
+        org.junit.jupiter.api.Assertions.assertEquals(
+                expected.intValue(),
+                lastResults.size(),
+                "Unexpected number of matching foods"
+        );
+    }
+
+    @Then("the results should include:")
+    public void the_results_should_include(io.cucumber.datatable.DataTable table) {
+        java.util.Set<String> names = lastResults.stream()
+                .map(Food::getName)
+                .collect(java.util.stream.Collectors.toSet());
+        for (Map<Object, Object> row : table.asMaps(Object.class, Object.class)) {
+            String expectedName = String.valueOf(row.get("Name")).trim();
+            org.junit.jupiter.api.Assertions.assertTrue(
+                    names.contains(expectedName),
+                    "Expected results to include: " + expectedName + " but got: " + names
+            );
+        }
+    }
+
 }

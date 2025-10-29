@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.dietapp.model.Food;
@@ -103,16 +104,16 @@ public class FoodService {
 
     public synchronized List<Food> filterFoodsByDietaryPreference(boolean isVegetarian, boolean isGlutenFree) {
         List<Food> filteredFoods = new ArrayList<>();
-        
+
         for (int i = 0; i < foods.size(); i++) {
             boolean hasPreferences = true;
-            
+
             List<String> dietaryTags = foods.get(i).getDietaryTags();
 
             if (dietaryTags == null && (isVegetarian || isGlutenFree)) {
                 continue;
             }
-            
+
             if (isVegetarian) {
                 boolean hasVegetarian = false;
                 for (int j = 0; j < dietaryTags.size(); j ++) {
@@ -125,7 +126,7 @@ public class FoodService {
                     hasPreferences = false;
                 }
             }
-            
+
             if (isGlutenFree && hasPreferences) {
                 boolean hasGF = false;
                 for (int j = 0; j < dietaryTags.size(); j ++) {
@@ -138,12 +139,12 @@ public class FoodService {
                     hasPreferences = false;
                 }
             }
-            
+
             if (hasPreferences) {
                 filteredFoods.add(foods.get(i));
             }
         }
-        
+
         return filteredFoods;
     }
 
@@ -168,4 +169,33 @@ public class FoodService {
             this.message = message;
         }
     }
-}
+
+    public List<Food> findFoodsByAvailabilityAndPreferences(
+            Set<String> availableIngredientNames,
+            boolean isVegetarian,
+            boolean isGlutenFree
+    ) {
+        // 1) Filter foods by dietary preference
+        List<Food> prefFiltered = filterFoodsByDietaryPreference(isVegetarian, isGlutenFree);
+
+        // 2) Normalize available ingredient names
+        Set<String> normalizedAvail = availableIngredientNames.stream()
+                .map(s -> s == null ? "" : s.trim().toLowerCase())
+                .collect(java.util.stream.Collectors.toSet());
+
+        // 3) Keep only foods whose ingredients are all available
+        List<Food> result = new ArrayList<>();
+        for (Food food : prefFiltered) {
+            List<String> ing = food.getIngredients();
+            if (ing == null || ing.isEmpty()) continue;
+            boolean allAvailable = ing.stream()
+                    .map(s -> s == null ? "" : s.trim().toLowerCase())
+                    .allMatch(normalizedAvail::contains);
+            if (allAvailable) {
+                result.add(food);
+            }
+        }
+        return result;
+    }
+    }
+
