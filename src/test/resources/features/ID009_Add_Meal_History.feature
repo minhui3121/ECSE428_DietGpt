@@ -1,4 +1,4 @@
-Feature: Add Meal History
+Feature: ID009 Add Meal History
 
 As a DietGPT user
 I would like to add a meal record to my meal history

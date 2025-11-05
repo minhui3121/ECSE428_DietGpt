@@ -16,7 +16,7 @@ Feature: ID011 Query Meal History
       | M-2025-11-02-101  | 2025-11-02 | Omelette          | Eggs,Cheese,Spinach  | 430      | Vegetarian     |
 
   # Normal flow
-  Scenario: Retrieve meals within a date range
+  Scenario: Retrieve meals within a date range (Normal Flow)
     When user "Alice" queries meal history from "2025-11-01" to "2025-11-02"
     Then the system returns the following meals for user "101":
       | date       | meal_name           |
@@ -24,7 +24,7 @@ Feature: ID011 Query Meal History
       | 2025-11-02 | Vegetable Stir-Fry  |
     And the result count is 2
 
-  Scenario: Retrieve the most recent meal
+  Scenario: Retrieve the most recent meal (Normal Flow)
     When user "Alice" requests the most recent meal
     Then the system returns a single meal for user "101" with:
       | field     | value               |
@@ -32,7 +32,7 @@ Feature: ID011 Query Meal History
       | date      | 2025-11-03          |
       | calories  | 350                 |
 
-  Scenario: Retrieve a meal by meal_id
+  Scenario: Retrieve a meal by meal_id (Normal Flow)
     When the user "Alice" requests meal details for id "M-2025-11-02-001"
     Then the system returns meal details:
       | field     | value               |
@@ -43,7 +43,7 @@ Feature: ID011 Query Meal History
       | tags      | Vegetarian,Gluten-Free |
 
   # Alternate flows
-  Scenario: Filter meals by tag (dietary preference)
+  Scenario: Filter meals by tag (dietary preference) (Alternate Flow)
     Given the user has a dietary preference "Vegetarian"
     When user "Alice" queries meal history from "2025-11-01" to "2025-11-03" filtered by tag "Vegetarian"
     Then the system returns the following meals for user "101":
@@ -54,17 +54,17 @@ Feature: ID011 Query Meal History
     And the returned meals should not contain "Chicken Rice"
 
   # Error flows
-  Scenario: No meals found in date range
+  Scenario: No meals found in date range (Error Flow)
     When user "Alice" queries meal history from "2025-10-01" to "2025-10-07"
     Then the system should display a message "No meals found for the specified period"
     And the result count is 0
 
-  Scenario: Meal not found by id
+  Scenario: Meal not found by id (Error Flow)
     When the user "Alice" requests meal details for id "M-9999-01-01-XYZ"
     Then the system should display a message "Meal not found"
     And the profile should not be updated
 
-  Scenario: Invalid date parameters
+  Scenario: Invalid date parameters (Error Flow)
     When user "Alice" queries meal history from "2025-11-10" to "2025-11-01"
     Then the system should display a message "Invalid date range"
     And the result count is 0

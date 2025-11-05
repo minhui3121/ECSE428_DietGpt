@@ -1,4 +1,4 @@
-Feature: Remove Meal History
+Feature: ID010 Remove Meal History
 
 As a DietGPT user
 I would like to remove a meal record from my meal history
@@ -11,10 +11,10 @@ And the user has the following meal history records:
     |Meal ID |Meal Type |Food Items      |Date |
     |101     |Breakfast |Oatmeal, Banana |2025-01-10 |
     |102     |Lunch     |Chicken Salad   |2025-01-10 |
-When the user removes the meal record with Meal ID "2"
+When the user removes the meal record with Meal ID "102"
 Then the system deletes the meal record successfully
 And the system displays "Meal record removed successfully"
-And the meal history should no longer contain Meal ID "2"
+And the meal history should no longer contain Meal ID "102"
 
 
 Scenario: Remove a Non-Existing Meal Record (Error Flow)

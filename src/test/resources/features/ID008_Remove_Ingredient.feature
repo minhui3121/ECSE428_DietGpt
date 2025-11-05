@@ -7,11 +7,11 @@ Feature: ID008 Remove Ingredient
   Background:
     Given the ingredient store is not empty
 
-  Scenario: Remove an existing ingredient successfully
+  Scenario: Remove an existing ingredient successfully (Normal Flow)
     Given an ingredient named "Rice" exists in the system
     When I remove ingredient "Rice"
     Then the system should not contain an ingredient named "Rice"
 
-  Scenario: Remove non-existing ingredient
+  Scenario: Remove non-existing ingredient (Error Flow)
     When I remove ingredient "DoesNotExist"
     Then I should see an error "Ingredient does not exist"
