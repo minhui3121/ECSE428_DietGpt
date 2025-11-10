@@ -96,4 +96,8 @@ public class UserService {
         }
         return null;
     }
+
+    public void removeFromMealHistory(User user, String food) {
+        user.getFoodHistory().removeIf(item -> item.getName().equals(food));
+    }
 }
