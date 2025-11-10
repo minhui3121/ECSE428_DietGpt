@@ -1,10 +1,23 @@
 package com.dietapp.spring.dto;
 
+import com.dietapp.spring.entity.FoodEntity;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 
 public class FoodDto {
     private String id;
+    public FoodDto(FoodEntity entity) {
+        if (entity == null) return;
+        this.id = entity.getId();
+        this.name = entity.getName();
+        this.calories = entity.getCalories();
+        this.servingSize = entity.getServingSize();
+        this.quantity = entity.getQuantity();
+        this.unit = entity.getUnit();
+    }
+
+    public FoodDto() {}
 
     @NotBlank
     private String name;

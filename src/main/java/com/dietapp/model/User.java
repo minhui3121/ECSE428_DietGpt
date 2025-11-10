@@ -1,5 +1,7 @@
 package com.dietapp.model;
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -13,6 +15,7 @@ public class User {
     private boolean vegetarian;
     private boolean glutenFree;
     private String password;
+    private List<Food> foodHistory;
 
     // No-args constructor
     public User() {}
@@ -27,5 +30,6 @@ public class User {
         this.weight = weight;
         this.vegetarian = vegetarian;
         this.glutenFree = glutenFree;
+        this.foodHistory = null;
     }
 }

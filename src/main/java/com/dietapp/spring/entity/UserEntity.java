@@ -1,5 +1,9 @@
 package com.dietapp.spring.entity;
 
+import java.util.List;
+
+import com.dietapp.model.Food;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,6 +22,7 @@ public class UserEntity {
     private double weight;
     private boolean vegetarian;
     private boolean glutenFree;
+    private List<FoodEntity> foodHistory;
     
     public UserEntity() {}
 
@@ -29,6 +34,7 @@ public class UserEntity {
         this.weight = weight;
         this.vegetarian = vegetarian;
         this.glutenFree = glutenFree;
+        foodHistory = null;
     }
 
     //setters and getters for user
@@ -64,6 +70,10 @@ public class UserEntity {
         return weight;
     }
 
+    public List<FoodEntity> getHist() {
+        return foodHistory;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -86,5 +96,9 @@ public class UserEntity {
 
     public void setWeight(double weight) {
         this.weight = weight;
+    }
+
+    public void setHist(List<FoodEntity> foodHistory) {
+        this.foodHistory = foodHistory;
     }
 } 

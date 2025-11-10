@@ -1,5 +1,8 @@
 package com.dietapp.spring.dto;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.dietapp.model.User;
 import com.dietapp.spring.entity.UserEntity;
 
@@ -12,6 +15,7 @@ public class UserResponseDto {
     private boolean vegetarian;
     private boolean glutenFree;
     private String password;
+    private List<FoodDto> foodHistory;
 
     @SuppressWarnings("unused")
     private UserResponseDto() {
@@ -27,6 +31,10 @@ public class UserResponseDto {
         this.vegetarian = model.getVeg();
         this.glutenFree = model.getGlut();
         this.password = model.getPassword();
+        if (model.getHist() != null) {
+            this.foodHistory = model.getHist().stream()
+                .map(FoodDto::new)
+                .collect(Collectors.toList());}
     }
 
     public String getId(){
@@ -59,6 +67,10 @@ public class UserResponseDto {
 
     public String getPassword(){
         return this.password;
+    }
+
+    public List<FoodDto> getHist(){
+        return this.foodHistory;
     }
 }
 
