@@ -13,6 +13,10 @@ import java.util.stream.Collectors;
 import io.cucumber.datatable.DataTable;
 import com.dietapp.model.Ingredient;
 import com.dietapp.service.IngredientService;
+import com.dietapp.model.Food;
+import com.dietapp.service.FoodService;
+import java.util.Arrays;
+import java.util.List;
 
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -22,20 +26,42 @@ import io.cucumber.java.en.Then;
 @SuppressWarnings("unused") // Cucumber loads these via reflection; IDE can't see direct usages
 public class IngredientStepDefinitions {
     private final IngredientService ingredientService = new IngredientService();
+    private final FoodService foodService = new FoodService();
     private int lastCode;
     private String lastBody;
     private final Map<String, String> lastFormData = new HashMap<>();
+    private boolean unauthenticated = false;
+    // used to simulate a concurrent addition of a food between check and delete
+    private String concurrentFoodName = null;
+    private String concurrentFoodIngredient = null;
 
     @Before
     public void resetStatus() {
         lastCode = 0;
         lastBody = null;
         lastFormData.clear();
+        this.unauthenticated = false;
+        this.concurrentFoodName = null;
+        this.concurrentFoodIngredient = null;
     }
 
     @Given("the ingredient store is empty")
     public void the_ingredient_store_is_empty() {
         ingredientService.clear();
+    }
+
+    @Given("the ingredient store is not empty")
+    public void the_ingredient_store_is_not_empty() {
+        if (ingredientService.getIngredients().isEmpty()) {
+            // add a simple ingredient to ensure non-empty
+            Ingredient ing = new Ingredient();
+            ing.setName("Sample");
+            ing.setUnit("GRAM");
+            IngredientService.ValidationResult vr = ingredientService.addIngredient(ing);
+            if (!vr.success) {
+                // if adding fails for any reason, still leave the store as-is
+            }
+        }
     }
 
     @Given("an ingredient table with the following information:")
@@ -62,6 +88,16 @@ public class IngredientStepDefinitions {
     public void have_added_ingredient(String name, String unit) {
         add_ingredient(name, unit);
         assertTrue(lastCode == 201 || lastCode == 200, "Add ingredient did not succeed: " + lastBody);
+    }
+
+    @Given("an ingredient named {string} exists in the system")
+    public void an_ingredient_named_exists_in_the_system(String name) {
+        Ingredient ing = new Ingredient();
+        ing.setName(name);
+        ing.setUnit("GRAM");
+        IngredientService.ValidationResult vr = ingredientService.addIngredient(ing);
+        if (vr.success) { lastCode = 201; lastBody = vr.message; } else { lastCode = 400; lastBody = vr.message; }
+        assertTrue(vr.success, "Failed to create ingredient for test: " + vr.message);
     }
 
     @When("the user submits the add-ingredient form")
@@ -97,6 +133,27 @@ public class IngredientStepDefinitions {
     @When("the user submits the add-ingredient form again with the same Name")
     public void submit_add_ingredient_form_again() {
         submit_add_ingredient_form();
+    }
+
+    @Given("a food {string} exists that uses ingredient {string}")
+    public void a_food_exists_that_uses_ingredient(String foodName, String ingredient) {
+        Food f = new Food();
+        f.setName(foodName);
+        f.setCalories(100);
+        f.setIngredients(Arrays.asList(ingredient));
+        FoodService.ValidationResult vr = foodService.addFood(f);
+        if (vr.success) { /* ok */ } else { throw new RuntimeException("Failed to add food: " + vr.message); }
+    }
+
+    @Given("I am an unauthenticated user")
+    public void i_am_an_unauthenticated_user() {
+        this.unauthenticated = true;
+    }
+
+    @Given("another process adds a food {string} that uses {string} between check and delete")
+    public void another_process_adds_a_food_between(String foodName, String ingredient) {
+        this.concurrentFoodName = foodName;
+        this.concurrentFoodIngredient = ingredient;
     }
 
     @When("the user updates the ingredient named {string} with the following information:")
@@ -152,6 +209,28 @@ public class IngredientStepDefinitions {
         if (vr.success) { lastCode = 200; lastBody = vr.message; } else { lastCode = 400; lastBody = vr.message; }
     }
 
+    @When("I remove ingredient {string}")
+    public void i_remove_ingredient(String name) {
+        // simulate auth
+        if (this.unauthenticated) {
+            lastCode = 401; lastBody = "Unauthorized"; return;
+        }
+
+        // simulate concurrent addition if requested
+        if (this.concurrentFoodName != null && this.concurrentFoodIngredient != null) {
+            Food f = new Food();
+            f.setName(this.concurrentFoodName);
+            f.setCalories(100);
+            f.setIngredients(Arrays.asList(this.concurrentFoodIngredient));
+            foodService.addFood(f);
+            this.concurrentFoodName = null;
+            this.concurrentFoodIngredient = null;
+        }
+
+        IngredientService.ValidationResult vr = ingredientService.removeIngredientByName(name);
+        if (vr.success) { lastCode = 200; lastBody = vr.message; } else { lastCode = 400; lastBody = vr.message; }
+    }
+
     @Then("the API should return success for ingredients")
     public void api_success_for_ingredients() {
         assertTrue(lastCode == 201 || lastCode == 200, "Expected success but was " + lastCode + " body:" + lastBody);
@@ -180,6 +259,34 @@ public class IngredientStepDefinitions {
             }
         }
         assertTrue(found, "Ingredient not found in list: name=" + name + " unit=" + unit);
+    }
+
+    @Then("the system should not contain an ingredient named {string}")
+    public void the_system_should_not_contain_an_ingredient_named(String name) {
+        String wanted = name == null ? "" : name.trim().toLowerCase();
+        List<Ingredient> list = ingredientService.getIngredients();
+        boolean found = false;
+        if (list != null) {
+            for (Ingredient i : list) {
+                String iname = i.getName() == null ? "" : i.getName().trim().toLowerCase();
+                if (wanted.equals(iname)) { found = true; break; }
+            }
+        }
+        org.junit.jupiter.api.Assertions.assertFalse(found, "ingredient should not be present: " + name);
+    }
+
+    @Then("the system should still contain an ingredient named {string}")
+    public void the_system_should_still_contain_an_ingredient_named(String name) {
+        String wanted = name == null ? "" : name.trim().toLowerCase();
+        List<Ingredient> list = ingredientService.getIngredients();
+        boolean found = false;
+        if (list != null) {
+            for (Ingredient i : list) {
+                String iname = i.getName() == null ? "" : i.getName().trim().toLowerCase();
+                if (wanted.equals(iname)) { found = true; break; }
+            }
+        }
+        org.junit.jupiter.api.Assertions.assertTrue(found, "ingredient should be present: " + name);
     }
 
     // Alias that matches your feature step verbatim

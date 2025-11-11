@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.dietapp.model.Ingredient;
+import com.dietapp.model.Food;
+import com.dietapp.service.FoodService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -174,6 +176,49 @@ public class IngredientService {
             }
         }
         return false;
+    }
+
+    /**
+     * Remove an ingredient by name (case-insensitive, trimmed).
+     * Performs validation and checks whether any Food currently uses the ingredient.
+     */
+    public synchronized ValidationResult removeIngredientByName(String name) {
+        if (name == null) return new ValidationResult(false, "Invalid ingredient name");
+        String cleaned = name.trim().replaceAll("\\s+", " ");
+        if (cleaned.isEmpty()) return new ValidationResult(false, "Invalid ingredient name");
+
+        int foundIdx = -1;
+        for (int i = 0; i < ingredients.size(); i++) {
+            Ingredient existing = ingredients.get(i);
+            // debug output to help trace failing test
+            System.out.println("[IngredientService] checking existing name='" + existing.getName() + "' against cleaned='" + cleaned + "'");
+            if (equalsIgnoreCaseSafe(existing.getName(), cleaned)) {
+                foundIdx = i;
+                break;
+            }
+        }
+        if (foundIdx == -1) return new ValidationResult(false, "Ingredient does not exist");
+
+        // Check food dependencies: if any food uses this ingredient, refuse to delete
+        try {
+            FoodService fs = new FoodService();
+            for (Food f : fs.getFoods()) {
+                if (f.getIngredients() == null) continue;
+                for (String ingName : f.getIngredients()) {
+                    if (ingName != null && ingName.trim().equalsIgnoreCase(cleaned)) {
+                        return new ValidationResult(false, "Ingredient is in use");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // If food list cannot be read for some reason, surface a generic error
+            return new ValidationResult(false, "Unable to verify ingredient usage");
+        }
+
+        // safe to delete
+        ingredients.remove(foundIdx);
+        persist();
+        return new ValidationResult(true, "Ingredient removed");
     }
 
     // ------------ Simple filters (optional, analogous to FoodService) ------------

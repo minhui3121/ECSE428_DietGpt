@@ -17,10 +17,74 @@ import io.cucumber.java.sl.In;
 public class IngredientServiceUnitTest {
 
     private static final Path STORE = Paths.get("data/ingredients.json");
+    private static final Path FOOD_STORE = Paths.get("data/foods.json");
 
     @BeforeEach
     public void cleanup() {
         try { Files.deleteIfExists(STORE); } catch (Exception ignore) {}
+        try { Files.deleteIfExists(FOOD_STORE); } catch (Exception ignore) {}
+    }
+
+    @Test
+    public void removeByName_success() {
+        IngredientService svc = new IngredientService();
+        Ingredient a = new Ingredient();
+        a.setName("Rice");
+        assertTrue(svc.addIngredient(a).success);
+
+        IngredientService.ValidationResult vr = svc.removeIngredientByName("Rice");
+        assertTrue(vr.success, "expected successful removal");
+        assertTrue(svc.getIngredients().isEmpty(), "store should be empty after removal");
+    }
+
+    @Test
+    public void removeByName_nonExisting() {
+        IngredientService svc = new IngredientService();
+        IngredientService.ValidationResult vr = svc.removeIngredientByName("DoesNotExist");
+        assertFalse(vr.success);
+        assertTrue(vr.message.toLowerCase().contains("does not exist"));
+    }
+
+    @Test
+    public void removeByName_invalidEmpty() {
+        IngredientService svc = new IngredientService();
+        IngredientService.ValidationResult vr = svc.removeIngredientByName("");
+        assertFalse(vr.success);
+        assertTrue(vr.message.toLowerCase().contains("invalid"));
+    }
+
+    @Test
+    public void removeByName_inUseByFood() {
+        IngredientService svc = new IngredientService();
+        Ingredient a = new Ingredient();
+        a.setName("Rice");
+        assertTrue(svc.addIngredient(a).success);
+
+        // add a food that uses Rice
+        FoodService fs = new FoodService();
+        com.dietapp.model.Food f = new com.dietapp.model.Food();
+        f.setName("Fried Rice");
+        f.setCalories(200);
+        f.setIngredients(List.of("Rice"));
+        assertTrue(fs.addFood(f).success);
+
+        IngredientService.ValidationResult vr = svc.removeIngredientByName("Rice");
+        assertFalse(vr.success);
+        assertTrue(vr.message.toLowerCase().contains("in use"));
+        // ingredient should still be present
+        assertFalse(svc.getIngredients().isEmpty());
+    }
+
+    @Test
+    public void removeByName_trimAndCaseInsensitive() {
+        IngredientService svc = new IngredientService();
+        Ingredient a = new Ingredient();
+        a.setName("Salt");
+        assertTrue(svc.addIngredient(a).success);
+
+        IngredientService.ValidationResult vr = svc.removeIngredientByName("  sAlT  ");
+        assertTrue(vr.success);
+        assertTrue(svc.getIngredients().isEmpty());
     }
 
     @Test
