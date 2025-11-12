@@ -176,8 +176,8 @@ public class MealPlanStepDefinitions {
         assertTrue("Expected meal plan NOT to contain: " + foodName, !found);
     }
 
-    @Then("the system should display a message {string}")
-    public void system_displays_message(String message) {
+    @Then("the system should show a message {string}")
+    public void system_should_show_message(String message) {
         if (generatedMealPlan.isEmpty()) {
             assertTrue(true);
         }

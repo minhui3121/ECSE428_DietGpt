@@ -44,7 +44,7 @@ Feature: ID011 Query Meal History
 
   # Alternate flows
   Scenario: Filter meals by tag (dietary preference) (Alternate Flow)
-    Given the user has a dietary preference "Vegetarian"
+    Given the user has the following dietary preference "Vegetarian"
     When user "Alice" queries meal history from "2025-11-01" to "2025-11-03" filtered by tag "Vegetarian"
     Then the system returns the following meals for user "101":
       | date       | meal_name           |
@@ -56,15 +56,15 @@ Feature: ID011 Query Meal History
   # Error flows
   Scenario: No meals found in date range (Error Flow)
     When user "Alice" queries meal history from "2025-10-01" to "2025-10-07"
-    Then the system should display a message "No meals found for the specified period"
+    Then the system should show a message "No meals found for the specified period"
     And the result count is 0
 
   Scenario: Meal not found by id (Error Flow)
     When the user "Alice" requests meal details for id "M-9999-01-01-XYZ"
-    Then the system should display a message "Meal not found"
-    And the profile should not be updated
+    Then the system should show a message "Meal not found"
+    And the profile should remain unchanged
 
   Scenario: Invalid date parameters (Error Flow)
     When user "Alice" queries meal history from "2025-11-10" to "2025-11-01"
-    Then the system should display a message "Invalid date range"
+    Then the system should show a message "Invalid date range"
     And the result count is 0

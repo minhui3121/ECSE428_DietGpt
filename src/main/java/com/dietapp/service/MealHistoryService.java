@@ -1,69 +1,40 @@
 package com.dietapp.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.dietapp.model.Meal;
-import com.dietapp.model.User;
-import com.dietapp.spring.dto.MealHistoryDto;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MealHistoryService {
 
-    private List<Meal> meals = new ArrayList<>();
+    private Map<String, List<Meal>> userMeals = new HashMap<>();
 
-    public MealHistoryDto getMealById(User user, Long mealId) {
-        if (user == null || user.getMealHistory() == null) {
-            return null;
-        }
-
-        for (Meal meal : user.getMealHistory()) {
-            if (meal.getMealId().equals(mealId)) {
-                return new MealHistoryDto(
-                        meal.getMealId(),
-                        meal.getDate(),
-                        meal.getMealName(),
-                        meal.getIngredients(),
-                        meal.getCalories(),
-                        meal.getTags()
-                );
-            }
-        }
-
-        return null;
+    public void loadMealsForUser(String userId, List<Meal> meals) {
+        userMeals.put(userId, new ArrayList<>(meals));
     }
 
-    public List<MealHistoryDto> getAllMeals(User user) {
-        List<MealHistoryDto> result = new ArrayList<>();
-
-        if (user == null || user.getMealHistory() == null) {
-            return result;
-        }
-
-        for (Meal meal : user.getMealHistory()) {
-            result.add(new MealHistoryDto(
-                    meal.getMealId(),
-                    meal.getDate(),
-                    meal.getMealName(),
-                    meal.getIngredients(),
-                    meal.getCalories(),
-                    meal.getTags()
-            ));
-        }
-
-        return result;
+    public List<Meal> queryMealsByDateRange(String userId, LocalDate start, LocalDate end) {
+        if (start.isAfter(end)) throw new IllegalArgumentException("Invalid date range");
+        return userMeals.getOrDefault(userId, List.of()).stream()
+                .filter(m -> !m.getDate().isBefore(start) && !m.getDate().isAfter(end))
+                .sorted(Comparator.comparing(Meal::getDate))
+                .collect(Collectors.toList());
     }
 
-    public String removeMeal(User user, Long mealId) {
-        if (user == null || user.getMealHistory() == null) {
-            return "User or meal history not found";
-        }
+    public List<Meal> queryMealsByDateRangeAndTag(String userId, LocalDate start, LocalDate end, String tag) {
+        return queryMealsByDateRange(userId, start, end).stream()
+                .filter(m -> m.getTags().stream().anyMatch(t -> t.equalsIgnoreCase(tag)))
+                .collect(Collectors.toList());
+    }
 
-        boolean removed = user.getMealHistory().removeIf(m -> m.getMealId().equals(mealId));
-
-        if (removed) {
-            return "Meal record removed successfully";
-        } else {
-            return "Meal record not found";
-        }
+    public Optional<Meal> getMostRecentMeal(String userId) {
+        return userMeals.getOrDefault(userId, List.of()).stream()
+                .max(Comparator.comparing(Meal::getDate));
+    }
+    
+    public Optional<Meal> getMealById(String userId, String mealId) {
+        return userMeals.getOrDefault(userId, List.of()).stream()
+                .filter(m -> m.getMealId().equals(mealId))
+                .findFirst();
     }
 }

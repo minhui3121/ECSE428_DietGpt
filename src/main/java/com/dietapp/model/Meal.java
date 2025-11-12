@@ -1,20 +1,25 @@
 package com.dietapp.model;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class Meal {
-    private Long mealId;
+
+    private String mealId;
+    private String userId;
     private LocalDate date;
     private String mealName;
-    private String ingredients;
-    private Double calories;
-    private String tags;
+    private List<String> ingredients;
+    private int calories;
+    private List<String> tags;
 
     public Meal() {}
 
-    public Meal(Long mealId, LocalDate date, String mealName,
-                String ingredients, Double calories, String tags) {
+    public Meal(String mealId, String userId, LocalDate date,
+                String mealName, List<String> ingredients,
+                int calories, List<String> tags) {
         this.mealId = mealId;
+        this.userId = userId;
         this.date = date;
         this.mealName = mealName;
         this.ingredients = ingredients;
@@ -22,9 +27,12 @@ public class Meal {
         this.tags = tags;
     }
 
-    //getters and Setters
-    public Long getMealId() { return mealId; }
-    public void setMealId(Long mealId) { this.mealId = mealId; }
+    //getters and setters
+    public String getMealId() { return mealId; }
+    public void setMealId(String mealId) { this.mealId = mealId; }
+
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
@@ -32,12 +40,25 @@ public class Meal {
     public String getMealName() { return mealName; }
     public void setMealName(String mealName) { this.mealName = mealName; }
 
-    public String getIngredients() { return ingredients; }
-    public void setIngredients(String ingredients) { this.ingredients = ingredients; }
+    public List<String> getIngredients() { return ingredients; }
+    public void setIngredients(List<String> ingredients) { this.ingredients = ingredients; }
 
-    public Double getCalories() { return calories; }
-    public void setCalories(Double calories) { this.calories = calories; }
+    public int getCalories() { return calories; }
+    public void setCalories(int calories) { this.calories = calories; }
 
-    public String getTags() { return tags; }
-    public void setTags(String tags) { this.tags = tags; }
+    public List<String> getTags() { return tags; }
+    public void setTags(List<String> tags) { this.tags = tags; }
+
+    @Override
+    public String toString() {
+        return "Meal{" +
+                "mealId='" + mealId + '\'' +
+                ", userId='" + userId + '\'' +
+                ", date=" + date +
+                ", mealName='" + mealName + '\'' +
+                ", ingredients=" + ingredients +
+                ", calories=" + calories +
+                ", tags=" + tags +
+                '}';
+    }
 }
