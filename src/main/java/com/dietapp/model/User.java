@@ -16,6 +16,7 @@ public class User {
     private boolean glutenFree;
     private String password;
     private List<Food> foodHistory;
+    private List<Meal> mealHistory;
 
     // No-args constructor
     public User() {}
@@ -31,5 +32,6 @@ public class User {
         this.vegetarian = vegetarian;
         this.glutenFree = glutenFree;
         this.foodHistory = null;
+        this.mealHistory = null;
     }
 }
