@@ -31,7 +31,6 @@ public class MealHistoryServiceUnitTest {
 
     @Test
     public void testAddMeal_Success() {
-        // Arrange
         Long userId = 1L;
         MealHistoryDto dto = new MealHistoryDto();
         dto.setDate(LocalDate.of(2025, 11, 12));
@@ -42,7 +41,6 @@ public class MealHistoryServiceUnitTest {
 
         when(repo.save(any(MealEntity.class))).thenAnswer(invocation -> {
             MealEntity saved = invocation.getArgument(0);
-            // Simulate database auto-generating ID
             try {
                 java.lang.reflect.Field idField = MealEntity.class.getDeclaredField("mealId");
                 idField.setAccessible(true);
@@ -54,10 +52,8 @@ public class MealHistoryServiceUnitTest {
             return saved;
         });
 
-        // Act
         MealHistoryDto result = service.add(dto, userId);
 
-        // Assert
         assertNotNull(result);
         assertEquals(100L, result.getMealId());
         assertEquals("Grilled Chicken Salad", result.getMealName());
@@ -67,7 +63,6 @@ public class MealHistoryServiceUnitTest {
 
     @Test
     public void testListMeals_ReturnsUserMeals() {
-        // Arrange
         Long userId = 1L;
         
         MealEntity meal1 = new MealEntity();
@@ -90,10 +85,8 @@ public class MealHistoryServiceUnitTest {
 
         when(repo.findByUserId(userId)).thenReturn(Arrays.asList(meal1, meal2));
 
-        // Act
         List<MealHistoryDto> results = service.list(userId);
 
-        // Assert
         assertNotNull(results);
         assertEquals(2, results.size());
         assertEquals("Breakfast", results.get(0).getMealName());
@@ -105,14 +98,11 @@ public class MealHistoryServiceUnitTest {
 
     @Test
     public void testListMeals_EmptyList() {
-        // Arrange
         Long userId = 99L;
         when(repo.findByUserId(userId)).thenReturn(Arrays.asList());
 
-        // Act
         List<MealHistoryDto> results = service.list(userId);
 
-        // Assert
         assertNotNull(results);
         assertEquals(0, results.size());
         verify(repo, times(1)).findByUserId(userId);
@@ -120,7 +110,6 @@ public class MealHistoryServiceUnitTest {
 
     @Test
     public void testGetMeal_Success() {
-        // Arrange
         Long userId = 1L;
         Long mealId = 10L;
 
@@ -135,10 +124,8 @@ public class MealHistoryServiceUnitTest {
 
         when(repo.findByMealIdAndUserId(mealId, userId)).thenReturn(Optional.of(meal));
 
-        // Act
         MealHistoryDto result = service.get(userId, mealId);
 
-        // Assert
         assertNotNull(result);
         assertEquals(mealId, result.getMealId());
         assertEquals("Dinner", result.getMealName());
@@ -148,13 +135,11 @@ public class MealHistoryServiceUnitTest {
 
     @Test
     public void testGetMeal_NotFound() {
-        // Arrange
         Long userId = 1L;
         Long mealId = 999L;
 
         when(repo.findByMealIdAndUserId(mealId, userId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             service.get(userId, mealId);
         });
@@ -165,14 +150,12 @@ public class MealHistoryServiceUnitTest {
 
     @Test
     public void testGetMeal_WrongUser() {
-        // Arrange
         Long userId = 1L;
         Long wrongUserId = 2L;
         Long mealId = 10L;
 
         when(repo.findByMealIdAndUserId(mealId, wrongUserId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             service.get(wrongUserId, mealId);
         });
@@ -183,30 +166,25 @@ public class MealHistoryServiceUnitTest {
 
     @Test
     public void testDeleteMeal_Success() {
-        // Arrange
         Long userId = 1L;
         Long mealId = 10L;
 
         when(repo.existsByMealIdAndUserId(mealId, userId)).thenReturn(true);
         doNothing().when(repo).deleteById(mealId);
 
-        // Act
         service.delete(userId, mealId);
 
-        // Assert
         verify(repo, times(1)).existsByMealIdAndUserId(mealId, userId);
         verify(repo, times(1)).deleteById(mealId);
     }
 
     @Test
     public void testDeleteMeal_NotFound() {
-        // Arrange
         Long userId = 1L;
         Long mealId = 999L;
 
         when(repo.existsByMealIdAndUserId(mealId, userId)).thenReturn(false);
 
-        // Act & Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             service.delete(userId, mealId);
         });
@@ -218,14 +196,12 @@ public class MealHistoryServiceUnitTest {
 
     @Test
     public void testDeleteMeal_WrongUser() {
-        // Arrange
         Long userId = 1L;
         Long wrongUserId = 2L;
         Long mealId = 10L;
 
         when(repo.existsByMealIdAndUserId(mealId, wrongUserId)).thenReturn(false);
 
-        // Act & Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             service.delete(wrongUserId, mealId);
         });
@@ -237,7 +213,6 @@ public class MealHistoryServiceUnitTest {
 
     @Test
     public void testAddMeal_WithAllFields() {
-        // Arrange
         Long userId = 5L;
         MealHistoryDto dto = new MealHistoryDto();
         dto.setDate(LocalDate.of(2025, 11, 12));
@@ -259,10 +234,8 @@ public class MealHistoryServiceUnitTest {
             return saved;
         });
 
-        // Act
         MealHistoryDto result = service.add(dto, userId);
 
-        // Assert
         assertNotNull(result);
         assertEquals(50L, result.getMealId());
         assertEquals("Protein Smoothie", result.getMealName());
@@ -278,7 +251,6 @@ public class MealHistoryServiceUnitTest {
 
     @Test
     public void testListMeals_MultipleUsers() {
-        // Arrange
         Long user1Id = 1L;
         Long user2Id = 2L;
 
@@ -297,11 +269,9 @@ public class MealHistoryServiceUnitTest {
         when(repo.findByUserId(user1Id)).thenReturn(Arrays.asList(meal1));
         when(repo.findByUserId(user2Id)).thenReturn(Arrays.asList(meal2));
 
-        // Act
         List<MealHistoryDto> user1Results = service.list(user1Id);
         List<MealHistoryDto> user2Results = service.list(user2Id);
 
-        // Assert
         assertEquals(1, user1Results.size());
         assertEquals(1, user2Results.size());
         assertEquals("User1 Meal", user1Results.get(0).getMealName());
