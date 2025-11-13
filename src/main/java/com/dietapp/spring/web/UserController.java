@@ -37,4 +37,5 @@ public class UserController {
     public UserResponseDto updateUser(@PathVariable("id") String id, @RequestBody UserResponseDto dto){
         return new UserResponseDto(userService.updateUser(id, dto));
     }
+    
 }
