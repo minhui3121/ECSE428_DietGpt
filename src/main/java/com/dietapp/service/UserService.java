@@ -97,8 +97,8 @@ public class UserService {
         return null;
     }
 
-    public String removeFromMealHistory(User user, String food) {
-        boolean removed = user.getFoodHistory().removeIf(item -> item.getName().equals(food));
+    public String removeFromMealHistory(User user, String food_id) {
+        boolean removed = user.getFoodHistory().removeIf(item -> item.getId().equals(food_id));
         if (removed) {
             return "Meal record removed successfully";
         } else {

@@ -1,11 +1,16 @@
 package com.dietapp.steps;
 
+import com.dietapp.model.Food;
 import com.dietapp.model.User;
 import com.dietapp.service.UserService;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
 import org.junit.jupiter.api.Assertions;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -92,5 +97,39 @@ public class UserStepDefinitions {
         User user = userService.getUserByEmail(this.user.getEmail());
         Assertions.assertEquals(this.user.isGlutenFree(), user.isGlutenFree());
         Assertions.assertEquals(this.user.isVegetarian(), user.isVegetarian());
+    }
+
+    @Given("the user has the following meal history records:")
+    public void the_user_has_meal_history(io.cucumber.datatable.DataTable dataTable) {
+        user = new User();
+        List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
+        List<Food> meals = new ArrayList<>();
+        for (Map<String, String> row : rows) {
+            Food food = new Food();
+            food.setId(row.get("Meal ID"));
+            meals.add(food);
+        }
+        user.setFoodHistory(meals);
+    }
+
+    @When("the user removes the meal record with Meal ID {string}")
+    public void the_user_removes_meal_record(String mealId) {
+        resultMessage = userService.removeFromMealHistory(user, mealId);
+    }
+
+    @Then("the system deletes the meal record successfully")
+    public void system_deletes_meal_record() {
+        assertEquals("Meal record removed successfully", resultMessage);
+    }
+
+    @Then("the meal history should no longer contain Meal ID {string}")
+    public void meal_history_should_not_contain(String mealId) {
+        List<Food> meals = user.getFoodHistory();
+        assertTrue(meals.stream().noneMatch(m -> m.getId().equals(mealId)));
+    }
+
+    @Then("no meal record should be removed")
+    public void no_meal_record_removed() {
+        assertEquals("Meal record not found", resultMessage);
     }
 }

@@ -23,8 +23,8 @@ Given user "Bob" with user id "2" is logged into the system
 And the user has the following meal history records:
     |Meal ID |Meal Type |Food Items      |Date |
     |201     | Dinner   |Pasta, Salad    |2025-01-08 |
-When the user attempts to remove the meal record with Meal ID "9999"
-Then the system displays an error message "Meal record not found"
+When the user removes the meal record with Meal ID "9999"
+Then the system displays "Meal record not found"
 And no meal record should be removed
 
 
