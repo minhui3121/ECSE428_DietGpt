@@ -50,6 +50,34 @@ public class UserStepDefinitions {
         userService.createUser(existingUser);
     }
 
+    @Given("the user has no meal history records")
+    public void the_user_has_no_meal_history_records() {
+        user = new User();
+        user.setFoodHistory(new ArrayList<>());
+    }
+
+    @Given("another user {string} owns a meal record with Meal ID {string}")
+    public void another_user_owns_a_meal_record_with_Meal_ID(String s, String s2) {
+        user = new User();
+        user.setFoodHistory(new ArrayList<>());
+
+        User otherUser = new User();
+        otherUser.setId(UUID.randomUUID().toString());
+        otherUser.setName(s);
+        otherUser.setEmail(s.toLowerCase() + "@email.com");
+        otherUser.setAge(28);
+        otherUser.setWeight(75);
+
+        Food meal = new Food();
+        meal.setId(s2);
+
+        List<Food> mealHistory = new ArrayList<>();
+        mealHistory.add(meal);
+        otherUser.setFoodHistory(mealHistory);
+
+        userService.createUser(otherUser);
+    }
+
     @When("the user submits the registration form")
     public void submitRegistrationForm() {
         resultMessage = userService.createUser(user);
