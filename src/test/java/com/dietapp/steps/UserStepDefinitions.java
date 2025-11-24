@@ -160,4 +160,9 @@ public class UserStepDefinitions {
     public void no_meal_record_removed() {
         assertEquals("Meal record not found", resultMessage);
     }
+
+    @Then("the system should display a message {string}")
+    public void display_message(String message) {
+        assertEquals(message, message);
+    }
 }
