@@ -190,8 +190,7 @@ public class IngredientService {
         int foundIdx = -1;
         for (int i = 0; i < ingredients.size(); i++) {
             Ingredient existing = ingredients.get(i);
-            // debug output to help trace failing test
-            System.out.println("[IngredientService] checking existing name='" + existing.getName() + "' against cleaned='" + cleaned + "'");
+            // (removed debug print) checking names
             if (equalsIgnoreCaseSafe(existing.getName(), cleaned)) {
                 foundIdx = i;
                 break;

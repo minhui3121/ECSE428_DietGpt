@@ -25,6 +25,11 @@ public class FoodService {
         load();
     }
 
+    public synchronized void clear() {
+        foods.clear();
+        persist();
+    }
+
     private void load() {
         if (storageFile.exists()) {
             try (FileReader fr = new FileReader(storageFile)) {

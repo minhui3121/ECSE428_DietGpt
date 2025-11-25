@@ -43,6 +43,9 @@ public class IngredientStepDefinitions {
         this.unauthenticated = false;
         this.concurrentFoodName = null;
         this.concurrentFoodIngredient = null;
+        // ensure each scenario runs with a clean store to avoid state leakage
+        try { ingredientService.clear(); } catch (Exception ignore) {}
+        try { foodService.clear(); } catch (Exception ignore) {}
     }
 
     @Given("the ingredient store is empty")
